@@ -478,6 +478,7 @@ class CircleFixedExtentScrollPhysics extends ScrollPhysics {
         'the FixedExtentScrollController');
 
     final _FixedExtentScrollPosition metrics = position;
+    return null;
 
     // Scenario 1:
     // If we're out of range and not headed back in range, defer to the parent
@@ -691,6 +692,13 @@ class _CircleListScrollViewState extends State<CircleListScrollView> {
   @override
   void didUpdateWidget(CircleListScrollView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (scrollController != null) {
+      final FixedExtentScrollController controllerUpdate = widget.controller ?? scrollController;
+
+      if (widget.value != _lastReportedItemIndex) {
+        controllerUpdate.jumpToItem(widget.value);
+      }
+    }
     if (widget.controller != null && widget.controller != scrollController) {
       final ScrollController oldScrollController = scrollController;
       SchedulerBinding.instance.addPostFrameCallback((_) {
