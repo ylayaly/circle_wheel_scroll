@@ -478,7 +478,7 @@ class CircleFixedExtentScrollPhysics extends ScrollPhysics {
         'the FixedExtentScrollController');
 
     final _FixedExtentScrollPosition metrics = position;
-    return null;
+    // return null;
     // Scenario 1:
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at the scrollable's boundary.
@@ -514,9 +514,9 @@ class CircleFixedExtentScrollPhysics extends ScrollPhysics {
 
     final double settlingPixels = settlingItemIndex * metrics.itemExtent;
 
-    // Scenario 3:
-    // If there's no velocity and we're already at where we intend to land,
-    // do nothing.
+    // // Scenario 3:
+    // // If there's no velocity and we're already at where we intend to land,
+    // // do nothing.
     if (velocity.abs() < tolerance.velocity &&
         (settlingPixels - metrics.pixels).abs() < tolerance.distance) {
       return null;
@@ -525,6 +525,7 @@ class CircleFixedExtentScrollPhysics extends ScrollPhysics {
     // Scenario 4:
     // If we're going to end back at the same item because initial velocity
     // is too low to break past it, use a spring simulation to get back.
+
     if (settlingItemIndex == metrics.itemIndex) {
       return SpringSimulation(
         SpringDescription.withDampingRatio(
@@ -581,6 +582,7 @@ class CircleListScrollView extends StatefulWidget {
     this.axis = Axis.vertical,
     this.radius = 100,
     @required this.value,
+    @required this.new_value,
   })  : assert(children != null),
         assert(itemExtent != null),
         assert(itemExtent > 0),
@@ -608,6 +610,7 @@ class CircleListScrollView extends StatefulWidget {
     this.axis = Axis.vertical,
     this.radius = 100,
     @required this.value,
+    @required this.new_value,
   })  : assert(childDelegate != null),
         assert(itemExtent != null),
         assert(itemExtent > 0),
@@ -667,8 +670,11 @@ class CircleListScrollView extends StatefulWidget {
   /// Circle radius
   final double radius;
 
-  /// Circle radius
+  /// Initial value
   final int value;
+
+  /// Input value
+  final int new_value;
 
   @override
   _CircleListScrollViewState createState() => _CircleListScrollViewState();
@@ -691,16 +697,17 @@ class _CircleListScrollViewState extends State<CircleListScrollView> {
 
   @override
   void didUpdateWidget(CircleListScrollView oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
     if (scrollController != null) {
-      final FixedExtentScrollController controllerUpdate = widget.controller ?? scrollController;
-
-      if (widget.value != _lastReportedItemIndex) {
-        controllerUpdate.jumpToItem(widget.value);
+      // scrollController = FixedExtentScrollController(initialItem: widget.value);
+      final FixedExtentScrollController controllerUpdate = scrollController;
+      if (widget.new_value != _lastReportedItemIndex && widget.new_value != 0) {
+        controllerUpdate.animateToItem(widget.new_value,
+            duration: Duration(milliseconds: 600), curve: Curves.fastOutSlowIn);
       }
     }
 
-    super.didUpdateWidget(oldWidget);
     if (widget.controller != null && widget.controller != scrollController) {
       final ScrollController oldScrollController = scrollController;
       SchedulerBinding.instance.addPostFrameCallback((_) {
